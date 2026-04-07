@@ -1,0 +1,90 @@
+:root {
+  /* Background */
+  --bg-1: #08081a;
+  --bg-2: #120828;
+
+  /* Glass surfaces */
+  --surface:        rgba(255, 255, 255, 0.05);
+  --surface-hover:  rgba(255, 255, 255, 0.08);
+  --surface-strong: rgba(255, 255, 255, 0.10);
+  --border:         rgba(255, 255, 255, 0.10);
+  --border-strong:  rgba(255, 255, 255, 0.20);
+
+  /* Text */
+  --text:      #eeeeff;
+  --text-muted: rgba(238, 238, 255, 0.55);
+  --text-dim:   rgba(238, 238, 255, 0.30);
+
+  /* Accent — Focus (violeta) */
+  --focus:       #7c3aed;
+  --focus-light: #a855f7;
+  --focus-glow:  rgba(124, 58, 237, 0.35);
+  --focus-ring:  rgba(124, 58, 237, 0.6);
+
+  /* Accent — Short Break (esmeralda) */
+  --brk:       #10b981;
+  --brk-light: #34d399;
+  --brk-glow:  rgba(16, 185, 129, 0.35);
+  --brk-ring:  rgba(16, 185, 129, 0.6);
+
+  /* Accent — Long Break (dourado) */
+  --lng:       #f59e0b;
+  --lng-light: #fbbf24;
+  --lng-glow:  rgba(245, 158, 11, 0.35);
+  --lng-ring:  rgba(245, 158, 11, 0.6);
+
+  /* Aliases dinâmicos — sobrescritos pelo JS via data-mode */
+  --accent:       var(--focus);
+  --accent-light: var(--focus-light);
+  --accent-glow:  var(--focus-glow);
+  --accent-ring:  var(--focus-ring);
+
+  /* Spacing */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 20px;
+  --sp-6: 24px;
+  --sp-8: 32px;
+  --sp-10: 40px;
+  --sp-12: 48px;
+
+  /* Radius */
+  --r-sm: 8px;
+  --r-md: 14px;
+  --r-lg: 20px;
+  --r-xl: 28px;
+  --r-full: 9999px;
+
+  /* Typography */
+  --font-body:    'Inter', system-ui, sans-serif;
+  --font-display: 'Outfit', system-ui, sans-serif;
+
+  /* Glass */
+  --glass-blur: blur(20px);
+
+  /* Transitions */
+  --t-fast: 0.15s ease;
+  --t-base: 0.3s ease;
+  --t-slow: 0.55s cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* SVG ring */
+  --ring-circumference: 553px; /* 2 * π * 88 */
+}
+
+/* Modo shortBreak */
+[data-mode="shortBreak"] {
+  --accent:       var(--brk);
+  --accent-light: var(--brk-light);
+  --accent-glow:  var(--brk-glow);
+  --accent-ring:  var(--brk-ring);
+}
+
+/* Modo longBreak */
+[data-mode="longBreak"] {
+  --accent:       var(--lng);
+  --accent-light: var(--lng-light);
+  --accent-glow:  var(--lng-glow);
+  --accent-ring:  var(--lng-ring);
+}
