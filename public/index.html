@@ -114,6 +114,7 @@
         <button class="modal-tab"        data-tab="alerts"      role="tab">🔔 Alertas</button>
         <button class="modal-tab"        data-tab="suggestions" role="tab">💡 Pausas</button>
         <button class="modal-tab"        data-tab="sync"        role="tab">🔄 Sync</button>
+        <button class="modal-tab"        data-tab="blocker"     role="tab">🚫 Bloqueios</button>
       </div>
       <div class="modal__content">
 
@@ -196,6 +197,74 @@
           <p class="link-msg" id="link-msg"></p>
         </div>
 
+        <!-- Tab: Bloqueios -->
+        <div class="tab-pane" data-pane="blocker">
+
+          <!-- Modo de bloqueio -->
+          <label class="form-label">Modo de bloqueio</label>
+          <div class="block-mode-group" role="radiogroup" aria-label="Modo de bloqueio">
+            <label class="block-mode-card">
+              <input type="radio" name="blockMode" value="off" id="blockmode-off" />
+              <div class="block-mode-card__inner">
+                <span class="block-mode-card__icon">⚪</span>
+                <span class="block-mode-card__title">Desativado</span>
+                <span class="block-mode-card__desc">Lista salva, sem monitoramento</span>
+              </div>
+            </label>
+            <label class="block-mode-card">
+              <input type="radio" name="blockMode" value="focus" id="blockmode-focus" />
+              <div class="block-mode-card__inner">
+                <span class="block-mode-card__icon">🟡</span>
+                <span class="block-mode-card__title">Só durante foco</span>
+                <span class="block-mode-card__desc">Ativa ao iniciar o timer de foco</span>
+              </div>
+            </label>
+            <label class="block-mode-card">
+              <input type="radio" name="blockMode" value="always" id="blockmode-always" />
+              <div class="block-mode-card__inner">
+                <span class="block-mode-card__icon">🔴</span>
+                <span class="block-mode-card__title">Sempre ativo</span>
+                <span class="block-mode-card__desc">Monitoramento contínuo</span>
+              </div>
+            </label>
+          </div>
+          <p class="form-hint">Pausas sempre liberam a navegação, independente do modo.</p>
+
+          <!-- Adicionar domínios -->
+          <label class="form-label" style="margin-top: var(--sp-5);">Adicionar sites</label>
+          <textarea
+            id="blocker-input"
+            class="blocker-textarea"
+            placeholder="Cole domínios aqui — um por linha ou separados por vírgula&#10;Ex: g1.globo.com, twitter.com"
+            rows="4"
+            spellcheck="false"
+          ></textarea>
+          <div class="blocker-add-row">
+            <button class="btn btn--primary btn--sm" id="btn-blocker-add">＋ Adicionar</button>
+            <span class="blocker-count" id="blocker-count">0 sites bloqueados</span>
+          </div>
+
+          <!-- Busca e lista -->
+          <div class="blocker-search-row">
+            <input
+              type="search"
+              id="blocker-search"
+              class="text-input blocker-search-input"
+              placeholder="🔍 Filtrar domínios…"
+              autocomplete="off"
+            />
+          </div>
+          <ul class="blocker-list" id="blocker-list" aria-label="Sites bloqueados"></ul>
+
+          <!-- Ações -->
+          <div class="blocker-actions">
+            <button class="btn btn--ghost btn--sm" id="btn-blocker-export-hosts">💾 Baixar arquivo hosts</button>
+            <button class="btn btn--ghost btn--sm" id="btn-blocker-export-ublock">📋 Copiar para uBlock</button>
+            <button class="btn btn--ghost btn--sm blocker-btn-danger" id="btn-blocker-clear">🗑 Limpar tudo</button>
+          </div>
+
+        </div><!-- /.tab-pane blocker -->
+
       </div><!-- /.modal__content -->
     </div><!-- /.modal__box -->
   </div><!-- /#modal-settings -->
@@ -236,5 +305,16 @@
   </div><!-- /#modal-history -->
 
   <script type="module" src="js/main.js"></script>
+
+  <!-- ═══════════════════ OVERLAY: BLOQUEADOR ═══════════════════ -->
+  <div id="blocker-overlay" class="blocker-overlay" hidden aria-live="assertive" role="alert">
+    <div class="blocker-overlay__content">
+      <div class="blocker-overlay__icon">🚫</div>
+      <h2 class="blocker-overlay__title">Foco quebrado!</h2>
+      <p class="blocker-overlay__msg">Você saiu da aba durante uma sessão de foco.<br>Volte ao Pomodoro e retome a concentração.</p>
+      <div class="blocker-overlay__timer" id="blocker-overlay-timer"></div>
+      <button class="btn btn--primary" id="btn-blocker-dismiss">↩ Voltar ao foco</button>
+    </div>
+  </div>
 </body>
 </html>

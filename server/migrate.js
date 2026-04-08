@@ -1,41 +1,55 @@
 require('dotenv').config();
 const pool = require('./db');
+const fs   = require('fs');
+const path = require('path');
+
+const MIGRATIONS_DIR = path.join(__dirname, 'migrations');
 
 async function migrate() {
   const client = await pool.connect();
   try {
-    console.log('🔧 Executando migrations...');
+    console.log('🔧 Iniciando runner de migrations…');
 
+    // Garante que a tabela de controle existe
     await client.query(`
-      CREATE TABLE IF NOT EXISTS users (
-        id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        sync_code  VARCHAR(7) UNIQUE NOT NULL,
-        created_at TIMESTAMPTZ DEFAULT NOW()
-      );
-
-      CREATE TABLE IF NOT EXISTS sessions (
-        id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        user_id      UUID REFERENCES users(id) ON DELETE CASCADE,
-        cycle_type   VARCHAR(20) NOT NULL,
-        mode         VARCHAR(15) NOT NULL,
-        duration_min INTEGER NOT NULL,
-        completed    BOOLEAN DEFAULT TRUE,
-        extended     BOOLEAN DEFAULT FALSE,
-        started_at   TIMESTAMPTZ NOT NULL,
-        ended_at     TIMESTAMPTZ NOT NULL
-      );
-
-      CREATE INDEX IF NOT EXISTS idx_sessions_user_ended
-        ON sessions(user_id, ended_at DESC);
-
-      CREATE TABLE IF NOT EXISTS settings (
-        user_id     UUID PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
-        preferences JSONB DEFAULT '{}',
-        updated_at  TIMESTAMPTZ DEFAULT NOW()
+      CREATE TABLE IF NOT EXISTS schema_migrations (
+        version    VARCHAR(255) PRIMARY KEY,
+        applied_at TIMESTAMPTZ DEFAULT NOW()
       );
     `);
 
-    console.log('✅ Migrations concluídas com sucesso!');
+    // Descobre os arquivos de migration em ordem
+    const files = fs.readdirSync(MIGRATIONS_DIR)
+      .filter(f => f.endsWith('.js'))
+      .sort(); // ordem alfanumérica: 001_, 002_, etc.
+
+    for (const file of files) {
+      const version = file.replace('.js', '');
+
+      // Verifica se já foi aplicada
+      const { rows } = await client.query(
+        'SELECT version FROM schema_migrations WHERE version = $1',
+        [version]
+      );
+      if (rows.length > 0) {
+        console.log(`  ⏭  ${file} — já aplicada, pulando.`);
+        continue;
+      }
+
+      // Aplica a migration
+      console.log(`  ▶  Aplicando ${file}…`);
+      const migration = require(path.join(MIGRATIONS_DIR, file));
+      await migration.up(client);
+
+      // Registra como aplicada
+      await client.query(
+        'INSERT INTO schema_migrations (version) VALUES ($1)',
+        [version]
+      );
+      console.log(`  ✅ ${file} aplicada com sucesso.`);
+    }
+
+    console.log('\n✅ Todas as migrations estão atualizadas!');
   } catch (err) {
     console.error('❌ Erro na migration:', err.message);
     process.exit(1);

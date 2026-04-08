@@ -12,8 +12,13 @@ import { getSettings, saveSettings, getSyncCode, setSyncCode } from './settings.
 import { recordSession, getHistory, registerUser, linkDevice, flushQueue } from './history.js';
 import { playAlert, testAlert } from './sounds.js';
 import { CYCLES } from './timer.js';
+import {
+  initOverlay, loadBlockedDomains, addDomains, removeDomain,
+  clearAllDomains, exportAsHosts, exportForUBlock,
+  activateBlocking, deactivateBlocking, applyBlockMode, hideBlockerOverlay,
+} from './blocker.js';
 
-// ─── Init ─────────────────────────────────────────────────────────────────────
+// ─── Init ─────────────────────────────────────────────────────────────────────────────────
 async function init() {
   const settings = getSettings();
   setCycle(settings.cycle);
@@ -21,10 +26,14 @@ async function init() {
   updateDots(0);
   populateSettingsForm(settings);
   await initSync();
+  initOverlay();
+  applyBlockMode();
+  await loadAndRenderBlockedDomains();
   bindTimerEvents();
   bindButtons();
   bindModals();
   bindSettingsForm();
+  bindBlockerPanel();
   window.addEventListener('online', () => flushQueue());
 }
 
@@ -50,11 +59,11 @@ async function initSync() {
 // ─── Timer events ─────────────────────────────────────────────────────────────
 function bindTimerEvents() {
   window.addEventListener('timer:tick',             () => updateDisplay());
-  window.addEventListener('timer:start',            () => updateDisplay());
-  window.addEventListener('timer:pause',            () => updateDisplay());
+  window.addEventListener('timer:start',            () => { updateDisplay(); _onTimerStart(); });
+  window.addEventListener('timer:pause',            () => { updateDisplay(); _onTimerPause(); });
   window.addEventListener('timer:update',           () => updateDisplay());
-  window.addEventListener('timer:reset',            () => { updateDisplay(); hideSuggestion(); hideBuffer(); });
-  window.addEventListener('timer:skip',             () => { updateDisplay(); hideSuggestion(); hideBuffer(); });
+  window.addEventListener('timer:reset',            () => { updateDisplay(); hideSuggestion(); hideBuffer(); _onTimerPause(); });
+  window.addEventListener('timer:skip',             () => { updateDisplay(); hideSuggestion(); hideBuffer(); _onTimerPause(); });
   window.addEventListener('timer:extended',         () => { updateDisplay(); hideBuffer(); });
   window.addEventListener('timer:buffer-available', () => showBuffer());
 
@@ -78,6 +87,7 @@ function bindTimerEvents() {
     updateDots(e.detail.pomodoroCount);
     showSuggestion(settings.activeCategories);
     hideBuffer();
+    _onTimerPause(); // foco concluído — desativa bloqueio
   });
 
   window.addEventListener('timer:break-complete', () => {
@@ -85,7 +95,22 @@ function bindTimerEvents() {
     _triggerAlert(settings);
     hideSuggestion();
     updateDisplay();
+    // pausa concluída — não reativa bloqueio automaticamente (usuário decide iniciar)
   });
+}
+
+// Ativa bloqueio ao iniciar foco
+function _onTimerStart() {
+  const mode = (getSettings().blockMode ?? 'focus');
+  if (mode === 'focus') activateBlocking();
+  // 'always' já está ativo via applyBlockMode(); 'off' não faz nada
+}
+
+// Desativa bloqueio ao pausar/resetar/completar
+function _onTimerPause() {
+  const mode = (getSettings().blockMode ?? 'focus');
+  if (mode === 'focus') deactivateBlocking();
+  // 'always' mantém ativo; 'off' já está inativo
 }
 
 function _triggerAlert(settings) {
@@ -299,5 +324,114 @@ function bindSettingsForm() {
   });
 }
 
+// ─── Blocker panel ─────────────────────────────────────────────────────────────
+
+let _allDomains = [];
+
+async function loadAndRenderBlockedDomains() {
+  _allDomains = await loadBlockedDomains();
+  renderBlockerList(_allDomains);
+  updateBlockerCount(_allDomains.length);
+}
+
+function renderBlockerList(domains) {
+  const list   = document.getElementById('blocker-list');
+  const search = document.getElementById('blocker-search')?.value.trim().toLowerCase() ?? '';
+  if (!list) return;
+  const filtered = search ? domains.filter(d => d.includes(search)) : domains;
+  list.innerHTML = filtered.map(d => `
+    <li class="blocker-item" data-domain="${d}">
+      <span class="blocker-item__domain">${d}</span>
+      <button class="blocker-item__remove" data-remove="${d}" aria-label="Remover ${d}" title="Remover">✕</button>
+    </li>`).join('');
+
+  list.querySelectorAll('[data-remove]').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      _allDomains = await removeDomain(btn.dataset.remove);
+      renderBlockerList(_allDomains);
+      updateBlockerCount(_allDomains.length);
+    });
+  });
+}
+
+function updateBlockerCount(n) {
+  const el = document.getElementById('blocker-count');
+  if (el) el.textContent = `${n} site${n !== 1 ? 's' : ''} bloqueado${n !== 1 ? 's' : ''}`;
+}
+
+function populateBlockModeRadio(settings) {
+  const mode = settings.blockMode ?? 'focus';
+  document.querySelectorAll('[name="blockMode"]').forEach(r => {
+    r.checked = r.value === mode;
+  });
+}
+
+function bindBlockerPanel() {
+  // Populate block mode radio based on current settings
+  populateBlockModeRadio(getSettings());
+
+  // Block mode radio change
+  document.querySelectorAll('[name="blockMode"]').forEach(r => {
+    r.addEventListener('change', () => {
+      const s = getSettings();
+      s.blockMode = r.value;
+      saveSettings(s);
+      applyBlockMode();
+    });
+  });
+
+  // Add domains textarea
+  document.getElementById('btn-blocker-add')?.addEventListener('click', async () => {
+    const ta = document.getElementById('blocker-input');
+    if (!ta?.value.trim()) return;
+    _allDomains = await addDomains(ta.value);
+    ta.value = '';
+    renderBlockerList(_allDomains);
+    updateBlockerCount(_allDomains.length);
+  });
+
+  // Search filter
+  document.getElementById('blocker-search')?.addEventListener('input', () => {
+    renderBlockerList(_allDomains);
+  });
+
+  // Export hosts
+  document.getElementById('btn-blocker-export-hosts')?.addEventListener('click', () => {
+    exportAsHosts(_allDomains);
+  });
+
+  // Export uBlock
+  document.getElementById('btn-blocker-export-ublock')?.addEventListener('click', async () => {
+    await exportForUBlock(_allDomains);
+    const btn = document.getElementById('btn-blocker-export-ublock');
+    if (btn) {
+      const prev = btn.textContent;
+      btn.textContent = '✅ Copiado!';
+      setTimeout(() => { btn.textContent = prev; }, 2000);
+    }
+  });
+
+  // Clear all
+  document.getElementById('btn-blocker-clear')?.addEventListener('click', async () => {
+    if (!confirm('Limpar toda a lista de sites bloqueados?')) return;
+    _allDomains = await clearAllDomains();
+    renderBlockerList(_allDomains);
+    updateBlockerCount(_allDomains.length);
+  });
+
+  // Dismiss overlay
+  document.getElementById('btn-blocker-dismiss')?.addEventListener('click', () => {
+    const { status } = getState();
+    if (['running', 'break_running'].includes(status)) window.focus();
+    hideBlockerOverlay();
+  });
+
+  // Reload blocker list when the Bloqueios tab is opened
+  document.querySelector('[data-tab="blocker"]')?.addEventListener('click', async () => {
+    await loadAndRenderBlockedDomains();
+  });
+}
+
 // ─── Bootstrap ────────────────────────────────────────────────────────────────
 init();
+
