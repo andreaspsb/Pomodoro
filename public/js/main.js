@@ -389,9 +389,6 @@ function bindBlockerPanel() {
       if (uBlockUrl) link.href = uBlockUrl;
       else { link.removeAttribute('href'); link.style.pointerEvents = 'none'; }
     }
-    if (uBlockUrl) {
-      try { window.open(uBlockUrl, '_blank'); } catch { /* silencioso */ }
-    }
   });
 
 
