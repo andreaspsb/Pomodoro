@@ -148,8 +148,9 @@ function _handlePageHide() {
 
 function _handleVisibility() {
   if (!_blockingActive) return;
+  // Mostra ao sair da aba; não esconde automaticamente ao voltar
+  // — o dismiss é sempre explícito (botão ou deactivateBlocking)
   if (document.hidden) showBlockerOverlay();
-  else hideBlockerOverlay();
 }
 
 export function activateBlocking() {
