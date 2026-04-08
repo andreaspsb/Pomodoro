@@ -371,24 +371,8 @@ function bindBlockerPanel() {
       setTimeout(() => { btn.textContent = prev; }, 2500);
     }
 
-    // IDs da extensão uBlock Origin por navegador
-    const ua = navigator.userAgent;
-    const isEdge    = ua.includes('Edg/');
-    const isFirefox = ua.includes('Firefox/');
-    const extId = isEdge
-      ? 'odfafepnkmbhccpbejgmiehpchacaeak'   // Edge Add-ons Store
-      : 'cjpalhdlnbpafiamejdnhcphjbkeiagm';  // Chrome Web Store
-    const uBlockUrl = isFirefox
-      ? null  // Firefox gera UUID aleatório — não é possível prever
-      : `chrome-extension://${extId}/dashboard.html#1p-filters.html`;
-
     const hint = document.getElementById('ublock-hint');
-    if (hint) {
-      hint.hidden = false;
-      const link = hint.querySelector('a');
-      if (uBlockUrl) link.href = uBlockUrl;
-      else { link.removeAttribute('href'); link.style.pointerEvents = 'none'; }
-    }
+    if (hint) hint.hidden = false;
   });
 
 
