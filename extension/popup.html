@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Meu Pomodoro Blocker</title>
+  <link rel="stylesheet" href="popup.css" />
+</head>
+<body>
+  <div class="popup">
+
+    <!-- Header -->
+    <div class="popup__header">
+      <span class="popup__logo">🍅</span>
+      <div>
+        <div class="popup__title">Pomodoro Blocker</div>
+        <div class="popup__status" id="status-text">Verificando…</div>
+      </div>
+    </div>
+
+    <!-- Configuração -->
+    <div class="popup__section" id="section-config">
+      <label class="popup__label" for="input-url">URL do seu Pomodoro</label>
+      <input
+        type="url"
+        id="input-url"
+        class="popup__input"
+        placeholder="https://seu-app.railway.app"
+        autocomplete="off"
+        spellcheck="false"
+      />
+
+      <label class="popup__label" for="input-code">Sync Code</label>
+      <input
+        type="text"
+        id="input-code"
+        class="popup__input popup__input--code"
+        placeholder="ex: DRAGO7"
+        maxlength="7"
+        autocomplete="off"
+        autocapitalize="characters"
+        spellcheck="false"
+      />
+
+      <button class="popup__btn popup__btn--primary" id="btn-save">Salvar e sincronizar</button>
+    </div>
+
+    <!-- Stats (visível depois de configurado) -->
+    <div class="popup__stats" id="stats" hidden>
+      <div class="popup__stat">
+        <span class="popup__stat-value" id="stat-count">0</span>
+        <span class="popup__stat-label">sites bloqueados</span>
+      </div>
+      <div class="popup__stat">
+        <span class="popup__stat-value" id="stat-sync">—</span>
+        <span class="popup__stat-label">última sync</span>
+      </div>
+    </div>
+
+    <!-- Erro -->
+    <div class="popup__error" id="error-box" hidden></div>
+
+    <!-- Ações -->
+    <div class="popup__actions">
+      <button class="popup__btn popup__btn--secondary" id="btn-sync">🔄 Sincronizar agora</button>
+      <button class="popup__btn popup__btn--ghost" id="btn-settings">⚙ Reconfigurar</button>
+    </div>
+
+  </div>
+  <script src="popup.js"></script>
+</body>
+</html>

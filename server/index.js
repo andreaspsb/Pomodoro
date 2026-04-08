@@ -12,7 +12,15 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Middlewares
-app.use(cors());
+app.use(cors({
+  origin: (origin, cb) => {
+    // Permite: sem origem (curl/server), extensões Chrome/Edge, e qualquer origem web
+    if (!origin || origin.startsWith('chrome-extension://')) return cb(null, true);
+    cb(null, true); // aberto — restringir por domínio em produção se necessário
+  },
+  allowedHeaders: ['Content-Type', 'X-Sync-Code'],
+}));
+
 app.use(express.json());
 
 // API Routes

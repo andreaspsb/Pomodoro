@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Site Bloqueado — Meu Pomodoro</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:           #0d0b14;
+      --surface:      #1a1628;
+      --border:       rgba(255,255,255,0.08);
+      --accent:       #7c3aed;
+      --accent-light: #a78bfa;
+      --text:         #f0edf8;
+      --text-muted:   #8b82a8;
+    }
+
+    html, body {
+      height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', system-ui, sans-serif;
+    }
+
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 24px;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 48px 40px;
+      max-width: 420px;
+      width: 100%;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+      box-shadow: 0 24px 80px rgba(0,0,0,0.5);
+    }
+
+    .icon {
+      font-size: 4rem;
+      line-height: 1;
+      animation: pulse 2s ease infinite;
+      filter: drop-shadow(0 0 20px rgba(124,58,237,0.5));
+    }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50%       { transform: scale(1.06); }
+    }
+
+    h1 {
+      font-size: 1.6rem;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      color: var(--text);
+    }
+
+    .domain {
+      font-family: monospace;
+      font-size: 0.9rem;
+      color: var(--accent-light);
+      background: rgba(124,58,237,0.1);
+      border: 1px solid rgba(124,58,237,0.2);
+      border-radius: 6px;
+      padding: 6px 14px;
+      letter-spacing: 0.04em;
+    }
+
+    p {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      width: 100%;
+      justify-content: center;
+    }
+
+    .btn {
+      font-family: inherit;
+      font-size: 0.85rem;
+      font-weight: 600;
+      border-radius: 9999px;
+      padding: 10px 22px;
+      cursor: pointer;
+      transition: all 0.15s;
+      border: none;
+    }
+    .btn--primary {
+      background: var(--accent);
+      color: #fff;
+    }
+    .btn--primary:hover { background: #6d28d9; }
+    .btn--ghost {
+      background: transparent;
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+    }
+    .btn--ghost:hover { color: var(--text); background: rgba(255,255,255,0.05); }
+
+    .footer {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      opacity: 0.6;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="icon">🍅</div>
+    <h1>Site bloqueado</h1>
+    <div class="domain" id="domain-label">—</div>
+    <p>Você configurou este site para não te distrair.<br>Mantenha o foco!</p>
+    <div class="actions">
+      <button class="btn btn--primary" onclick="history.back()">← Voltar</button>
+      <button class="btn btn--ghost" onclick="openPomodoro()">Abrir Pomodoro</button>
+    </div>
+    <div class="footer">Bloqueado pelo Meu Pomodoro Blocker</div>
+  </div>
+
+  <script>
+    // Pega o domínio do parâmetro de URL
+    const params = new URLSearchParams(location.search);
+    const domain = params.get('domain');
+    if (domain) document.getElementById('domain-label').textContent = domain;
+
+    async function openPomodoro() {
+      const { apiUrl } = await chrome.storage.sync.get('apiUrl');
+      if (apiUrl) window.open(apiUrl, '_blank');
+    }
+  </script>
+</body>
+</html>
