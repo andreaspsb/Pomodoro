@@ -13,9 +13,8 @@ import { recordSession, getHistory, registerUser, linkDevice, flushQueue } from 
 import { playAlert, testAlert } from './sounds.js';
 import { CYCLES } from './timer.js';
 import {
-  initOverlay, loadBlockedDomains, addDomains, removeDomain,
+  loadBlockedDomains, addDomains, removeDomain,
   clearAllDomains, exportAsHosts, exportForUBlock,
-  activateBlocking, deactivateBlocking, applyBlockMode, hideBlockerOverlay,
 } from './blocker.js';
 
 // ─── Init ─────────────────────────────────────────────────────────────────────────────────
@@ -26,8 +25,6 @@ async function init() {
   updateDots(0);
   populateSettingsForm(settings);
   await initSync();
-  initOverlay();
-  applyBlockMode();
   await loadAndRenderBlockedDomains();
   bindTimerEvents();
   bindButtons();
@@ -59,11 +56,11 @@ async function initSync() {
 // ─── Timer events ─────────────────────────────────────────────────────────────
 function bindTimerEvents() {
   window.addEventListener('timer:tick',             () => updateDisplay());
-  window.addEventListener('timer:start',            () => { updateDisplay(); _onTimerStart(); });
-  window.addEventListener('timer:pause',            () => { updateDisplay(); _onTimerPause(); });
+  window.addEventListener('timer:start',            () => updateDisplay());
+  window.addEventListener('timer:pause',            () => updateDisplay());
   window.addEventListener('timer:update',           () => updateDisplay());
-  window.addEventListener('timer:reset',            () => { updateDisplay(); hideSuggestion(); hideBuffer(); _onTimerPause(); });
-  window.addEventListener('timer:skip',             () => { updateDisplay(); hideSuggestion(); hideBuffer(); _onTimerPause(); });
+  window.addEventListener('timer:reset',            () => { updateDisplay(); hideSuggestion(); hideBuffer(); });
+  window.addEventListener('timer:skip',             () => { updateDisplay(); hideSuggestion(); hideBuffer(); });
   window.addEventListener('timer:extended',         () => { updateDisplay(); hideBuffer(); });
   window.addEventListener('timer:buffer-available', () => showBuffer());
 
@@ -87,7 +84,6 @@ function bindTimerEvents() {
     updateDots(e.detail.pomodoroCount);
     showSuggestion(settings.activeCategories);
     hideBuffer();
-    _onTimerPause(); // foco concluído — desativa bloqueio
   });
 
   window.addEventListener('timer:break-complete', () => {
@@ -95,22 +91,7 @@ function bindTimerEvents() {
     _triggerAlert(settings);
     hideSuggestion();
     updateDisplay();
-    // pausa concluída — não reativa bloqueio automaticamente (usuário decide iniciar)
   });
-}
-
-// Ativa bloqueio ao iniciar foco
-function _onTimerStart() {
-  const mode = (getSettings().blockMode ?? 'focus');
-  if (mode === 'focus') activateBlocking();
-  // 'always' já está ativo via applyBlockMode(); 'off' não faz nada
-}
-
-// Desativa bloqueio ao pausar/resetar/completar
-function _onTimerPause() {
-  const mode = (getSettings().blockMode ?? 'focus');
-  if (mode === 'focus') deactivateBlocking();
-  // 'always' mantém ativo; 'off' já está inativo
 }
 
 function _triggerAlert(settings) {
@@ -359,27 +340,7 @@ function updateBlockerCount(n) {
   if (el) el.textContent = `${n} site${n !== 1 ? 's' : ''} bloqueado${n !== 1 ? 's' : ''}`;
 }
 
-function populateBlockModeRadio(settings) {
-  const mode = settings.blockMode ?? 'focus';
-  document.querySelectorAll('[name="blockMode"]').forEach(r => {
-    r.checked = r.value === mode;
-  });
-}
-
 function bindBlockerPanel() {
-  // Populate block mode radio based on current settings
-  populateBlockModeRadio(getSettings());
-
-  // Block mode radio change
-  document.querySelectorAll('[name="blockMode"]').forEach(r => {
-    r.addEventListener('change', () => {
-      const s = getSettings();
-      s.blockMode = r.value;
-      saveSettings(s);
-      applyBlockMode();
-    });
-  });
-
   // Add domains textarea
   document.getElementById('btn-blocker-add')?.addEventListener('click', async () => {
     const ta = document.getElementById('blocker-input');
@@ -417,13 +378,6 @@ function bindBlockerPanel() {
     _allDomains = await clearAllDomains();
     renderBlockerList(_allDomains);
     updateBlockerCount(_allDomains.length);
-  });
-
-  // Dismiss overlay
-  document.getElementById('btn-blocker-dismiss')?.addEventListener('click', () => {
-    const { status } = getState();
-    if (['running', 'break_running'].includes(status)) window.focus();
-    hideBlockerOverlay();
   });
 
   // Reload blocker list when the Bloqueios tab is opened

@@ -200,38 +200,8 @@
         <!-- Tab: Bloqueios -->
         <div class="tab-pane" data-pane="blocker">
 
-          <!-- Modo de bloqueio -->
-          <label class="form-label">Modo de bloqueio</label>
-          <div class="block-mode-group" role="radiogroup" aria-label="Modo de bloqueio">
-            <label class="block-mode-card">
-              <input type="radio" name="blockMode" value="off" id="blockmode-off" />
-              <div class="block-mode-card__inner">
-                <span class="block-mode-card__icon">⚪</span>
-                <span class="block-mode-card__title">Desativado</span>
-                <span class="block-mode-card__desc">Lista salva, sem monitoramento</span>
-              </div>
-            </label>
-            <label class="block-mode-card">
-              <input type="radio" name="blockMode" value="focus" id="blockmode-focus" />
-              <div class="block-mode-card__inner">
-                <span class="block-mode-card__icon">🟡</span>
-                <span class="block-mode-card__title">Só durante foco</span>
-                <span class="block-mode-card__desc">Ativa ao iniciar o timer de foco</span>
-              </div>
-            </label>
-            <label class="block-mode-card">
-              <input type="radio" name="blockMode" value="always" id="blockmode-always" />
-              <div class="block-mode-card__inner">
-                <span class="block-mode-card__icon">🔴</span>
-                <span class="block-mode-card__title">Sempre ativo</span>
-                <span class="block-mode-card__desc">Monitoramento contínuo</span>
-              </div>
-            </label>
-          </div>
-          <p class="form-hint">Pausas sempre liberam a navegação, independente do modo.</p>
-
           <!-- Adicionar domínios -->
-          <label class="form-label" style="margin-top: var(--sp-5);">Adicionar sites</label>
+          <label class="form-label">Adicionar sites</label>
           <textarea
             id="blocker-input"
             class="blocker-textarea"
@@ -305,16 +275,5 @@
   </div><!-- /#modal-history -->
 
   <script type="module" src="js/main.js"></script>
-
-  <!-- ═══════════════════ OVERLAY: BLOQUEADOR ═══════════════════ -->
-  <div id="blocker-overlay" class="blocker-overlay" hidden aria-live="assertive" role="alert">
-    <div class="blocker-overlay__content">
-      <div class="blocker-overlay__icon">🚫</div>
-      <h2 class="blocker-overlay__title">Foco quebrado!</h2>
-      <p class="blocker-overlay__msg">Você saiu da aba durante uma sessão de foco.<br>Volte ao Pomodoro e retome a concentração.</p>
-      <div class="blocker-overlay__timer" id="blocker-overlay-timer"></div>
-      <button class="btn btn--primary" id="btn-blocker-dismiss">↩ Voltar ao foco</button>
-    </div>
-  </div>
 </body>
 </html>

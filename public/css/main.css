@@ -610,37 +610,6 @@ body.modal-open { overflow: hidden; }
 
 /* ═══════════════ BLOQUEADOR DE SITES ═══════════════ */
 
-/* ── Block mode cards ── */
-.block-mode-group {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: var(--sp-2);
-  margin-bottom: var(--sp-3);
-}
-.block-mode-card input { display: none; }
-.block-mode-card__inner {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--sp-1);
-  padding: var(--sp-3) var(--sp-2);
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--r-md);
-  cursor: pointer;
-  transition: all var(--t-base);
-  text-align: center;
-}
-.block-mode-card__icon  { font-size: 1.2rem; }
-.block-mode-card__title { font-size: 0.8rem; font-weight: 600; color: var(--text); }
-.block-mode-card__desc  { font-size: 0.7rem; color: var(--text-muted); line-height: 1.3; }
-.block-mode-card input:checked + .block-mode-card__inner {
-  border-color: var(--accent);
-  background: rgba(124,58,237,0.12);
-  box-shadow: 0 0 14px var(--accent-glow);
-}
-.block-mode-card:hover .block-mode-card__inner { border-color: var(--border-strong); }
-
 /* ── Textarea de adição ── */
 .blocker-textarea {
   width: 100%;
@@ -667,10 +636,7 @@ body.modal-open { overflow: hidden; }
   gap: var(--sp-3);
   margin-bottom: var(--sp-4);
 }
-.blocker-count {
-  font-size: 0.78rem;
-  color: var(--text-muted);
-}
+.blocker-count { font-size: 0.78rem; color: var(--text-muted); }
 
 /* ── Search ── */
 .blocker-search-row { margin-bottom: var(--sp-2); }
@@ -728,113 +694,11 @@ body.modal-open { overflow: hidden; }
 .blocker-item__remove:hover { background: rgba(248,113,113,0.15); color: #f87171; }
 
 /* ── Blocker actions ── */
-.blocker-actions {
-  display: flex;
-  gap: var(--sp-2);
-  flex-wrap: wrap;
-}
+.blocker-actions { display: flex; gap: var(--sp-2); flex-wrap: wrap; }
 .blocker-btn-danger { color: #f87171 !important; border-color: rgba(248,113,113,0.3) !important; }
 .blocker-btn-danger:hover { background: rgba(248,113,113,0.1) !important; }
 
-/* ── Feedback toast ── */
-.blocker-toast {
-  font-size: 0.8rem;
-  color: var(--brk-light);
-  margin-top: var(--sp-2);
-  min-height: 1.2em;
-  transition: opacity var(--t-base);
-}
-
-/* ══════════════════════════════════════════════════════
-   OVERLAY DE BLOQUEIO — cobre o viewport inteiro
-══════════════════════════════════════════════════════ */
-.blocker-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 9999;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(8, 4, 16, 0.96);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  opacity: 0;
-  transition: opacity var(--t-base);
-}
-.blocker-overlay--visible { opacity: 1; }
-.blocker-overlay[hidden] { display: none; }
-
-.blocker-overlay__content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--sp-4);
-  padding: var(--sp-10) var(--sp-8);
-  max-width: 400px;
-  text-align: center;
-  animation: overlayBounceIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-@keyframes overlayBounceIn {
-  from { transform: scale(0.85) translateY(20px); opacity: 0; }
-  to   { transform: scale(1) translateY(0);        opacity: 1; }
-}
-
-.blocker-overlay__icon {
-  font-size: 4rem;
-  animation: overlayPulse 1.8s ease infinite;
-  filter: drop-shadow(0 0 20px rgba(239, 68, 68, 0.6));
-}
-
-@keyframes overlayPulse {
-  0%, 100% { transform: scale(1); }
-  50%       { transform: scale(1.1); }
-}
-
-.blocker-overlay__title {
-  font-family: var(--font-display);
-  font-size: 2rem;
-  font-weight: 700;
-  color: #f87171;
-  text-shadow: 0 0 30px rgba(239, 68, 68, 0.5);
-  letter-spacing: -0.03em;
-}
-
-.blocker-overlay__msg {
-  font-size: 0.95rem;
-  color: var(--text-muted);
-  line-height: 1.6;
-}
-
-.blocker-overlay__timer {
-  font-family: var(--font-display);
-  font-size: 1.6rem;
-  font-weight: 600;
-  color: var(--focus-light);
-  letter-spacing: 0.04em;
-  min-height: 2rem;
-}
-
-/* Linha de gradiente vermelha na borda superior do overlay */
-.blocker-overlay::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border: 2px solid transparent;
-  border-top-color: rgba(239, 68, 68, 0.6);
-  border-radius: 0;
-  animation: borderScan 2s linear infinite;
-  pointer-events: none;
-}
-
-@keyframes borderScan {
-  0%   { opacity: 0.4; }
-  50%  { opacity: 1; }
-  100% { opacity: 0.4; }
-}
-
 @media (max-width: 400px) {
-  .block-mode-group { grid-template-columns: 1fr; }
-  .blocker-overlay__title { font-size: 1.5rem; }
-  .blocker-overlay__icon  { font-size: 3rem; }
+  .blocker-actions { flex-direction: column; }
 }
+
